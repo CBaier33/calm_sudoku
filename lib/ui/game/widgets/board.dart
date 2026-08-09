@@ -29,18 +29,7 @@ Widget _buildCells(BuildContext context, int index) {
   CellPoint cell = CellPoint(x: x, y: y);
 
   return GestureDetector(
-    onTapDown: (_) => currentGame.setCellPressed(true),
-    onTapUp: (_) async {
-      await Future.delayed(const Duration(milliseconds: 100));
-      currentGame.setCellPressed(false);
-    },
-    onLongPressStart: (_) {
-      currentGame.setCellPressed(true);
-      currentGame.onLongPressCell(cell);
-    },
-    onLongPressEnd: (_) {
-      currentGame.setCellPressed(false);
-    },
+    onLongPressStart: (_) => currentGame.onLongPressCell(cell),
     onTap: () => currentGame.onTapCell(cell),
     child: GridTile(
       child: Cell(gridPoint: cell),

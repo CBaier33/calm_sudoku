@@ -4,7 +4,7 @@ import 'package:sudoku/models/game_stats.dart';
 import 'package:sudoku/services/stats_service.dart';
 import 'package:sudoku/ui/core/widgets/action_modal.dart';
 import 'package:sudoku/ui/core/widgets/simple_button.dart';
-import 'package:sudoku/ui/game/widgets/digit_display.dart';
+import 'package:sudoku/ui/game/widgets/timer_display.dart';
 import 'package:sudoku/ui/page/view_models/options_view_model.dart';
 
 class StatScreen extends StatefulWidget {

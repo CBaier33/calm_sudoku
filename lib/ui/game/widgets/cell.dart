@@ -28,13 +28,18 @@ class Cell extends StatelessWidget {
       child: cell.value == 0
           ? Notes(notes: cell.notes)
           : Center(
-              child: Text(
-                cell.value.toString(),
-                style:
-                    (cell.given
-                            ? Theme.of(context).textTheme.headlineSmall
-                            : Theme.of(context).textTheme.headlineMedium)
-                        ?.copyWith(color: wrong ? Colors.white : Colors.black),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  cell.value.toString(),
+                  style:
+                      (cell.given
+                              ? Theme.of(context).textTheme.headlineSmall
+                              : Theme.of(context).textTheme.headlineMedium)
+                          ?.copyWith(
+                            color: wrong ? Colors.white : Colors.black,
+                          ),
+                ),
               ),
             ),
     );
@@ -94,23 +99,38 @@ class Notes extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    // Each mark takes a fixed ninth of the cell instead of its natural text
+    // size, so the marks stay on their own grid however small the cell gets.
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         for (int row = 0; row < PuzzleService.box; row++)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              for (int col = 0; col < PuzzleService.box; col++)
-                Text(
-                  notes.contains(row * PuzzleService.box + col + 1)
-                      ? "${row * PuzzleService.box + col + 1}"
-                      : " ",
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-            ],
+          Expanded(
+            child: Row(
+              children: [
+                for (int col = 0; col < PuzzleService.box; col++)
+                  Expanded(
+                    child: _mark(context, row * PuzzleService.box + col + 1),
+                  ),
+              ],
+            ),
           ),
       ],
+    );
+  }
+
+  Widget _mark(BuildContext context, int digit) {
+    if (!notes.contains(digit)) return const SizedBox.shrink();
+
+    // scaleDown only shrinks the glyph when a ninth of the cell is smaller
+    // than the font - on a roomy board it draws at its normal size.
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          "$digit",
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ),
     );
   }
 }

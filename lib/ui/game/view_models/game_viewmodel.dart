@@ -25,7 +25,6 @@ class GameViewModel extends ChangeNotifier {
 
   int mistakes = 0;
   late int remaining;
-  bool cellPressedDown = false;
 
   Timer? _timer;
   int time = 0;
@@ -107,7 +106,7 @@ class GameViewModel extends ChangeNotifier {
     selected = null;
     noteMode = false;
 
-    // reset game state (and smiley!)
+    // reset game state
     gameState = 0;
 
     // Reset Timer
@@ -165,11 +164,6 @@ class GameViewModel extends ChangeNotifier {
     final s = selected;
 
     return s != null && s.x == p.x && s.y == p.y;
-  }
-
-  void setCellPressed(bool p) {
-    cellPressedDown = p;
-    notifyListeners();
   }
 
   void onTapCell(CellPoint p) {
@@ -276,21 +270,6 @@ class GameViewModel extends ChangeNotifier {
         if (isPeer(p, peer)) getCell(peer).notes.remove(digit);
       }
     }
-  }
-
-  String getCurrentSmiley() {
-    String smileType = 'normal';
-
-    switch (gameState) {
-      case 0:
-        smileType = (cellPressedDown) ? 'engaged' : smileType;
-      case 1:
-        smileType = 'lose';
-      case 2:
-        smileType = 'win';
-    }
-
-    return "assets/$smileType-smile.png";
   }
 
   //

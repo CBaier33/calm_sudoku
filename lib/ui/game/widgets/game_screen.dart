@@ -4,9 +4,9 @@ import 'package:sudoku/ui/core/widgets/action_modal.dart';
 import 'package:sudoku/ui/core/widgets/simple_button.dart';
 import 'package:sudoku/ui/game/view_models/game_viewmodel.dart';
 import 'package:sudoku/ui/game/widgets/board.dart';
-import 'package:sudoku/ui/game/widgets/game_bar.dart';
 import 'package:sudoku/ui/game/widgets/mistake_display.dart';
 import 'package:sudoku/ui/game/widgets/number_pad.dart';
+import 'package:sudoku/ui/game/widgets/timer_display.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key, required this.viewModel});
@@ -53,8 +53,10 @@ class _GameScreenState extends State<GameScreen> {
           shape: const Border(top: BorderSide(color: Colors.black, width: 3.0)),
           actionsPadding: EdgeInsets.only(right: 10),
           actions: [
+            TimerDisplay(),
+            const SizedBox(width: 6),
             MistakeDisplay(),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Container(
               width: 50,
               height: 35,
@@ -129,7 +131,6 @@ class _GameScreenState extends State<GameScreen> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GameBar(),
             Expanded(
               child: Center(
                 child: AspectRatio(

@@ -4,7 +4,6 @@ import 'package:sudoku/ui/core/widgets/difficulty_selector.dart';
 import 'package:sudoku/ui/core/widgets/page_route.dart';
 import 'package:sudoku/ui/core/widgets/simple_appbar.dart';
 import 'package:sudoku/ui/core/widgets/simple_button.dart';
-import 'package:sudoku/ui/core/widgets/simple_toggle.dart';
 import 'package:sudoku/ui/game/view_models/game_viewmodel.dart';
 import 'package:sudoku/ui/game/widgets/game_screen.dart';
 import 'package:sudoku/ui/page/view_models/options_view_model.dart';
@@ -31,10 +30,6 @@ class _OptionsScreenState extends State<OptionsScreen> {
   Future<void> _precacheImages() async {
   const assets = [
     'assets/pause.png',
-    'assets/engaged-smile.png',
-    'assets/lose-smile.png',
-    'assets/normal-smile.png',
-    'assets/win-smile.png',
   ];
 
   for (final asset in assets) {
@@ -74,24 +69,6 @@ class _OptionsScreenState extends State<OptionsScreen> {
                   ChangeNotifierProvider.value(
                     value: optionsViewModel,
                     child: DifficultySelector(),
-                  ),
-                  SimpleToggle(
-                    label: "Highlight Peers",
-                    value: optionsViewModel.highlightPeers,
-                    onChanged: (v) {
-                      setState(() {
-                        optionsViewModel.highlightPeers = v;
-                      });
-                    },
-                  ),
-                  SimpleToggle(
-                    label: "Auto Clear Notes",
-                    value: optionsViewModel.autoClearNotes,
-                    onChanged: (v) {
-                      setState(() {
-                        optionsViewModel.autoClearNotes = v;
-                      });
-                    },
                   ),
                 ],
               ),
