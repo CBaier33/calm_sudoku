@@ -1,11 +1,15 @@
 package com.cbaier33.sudoku.theme
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mudita.mmd.ThemeMMD
 import com.mudita.mmd.black
 import com.mudita.mmd.eInkColorScheme
@@ -13,7 +17,8 @@ import com.mudita.mmd.eInkTypography
 import com.mudita.mmd.white
 
 /**
- * MMD's theme, with the gaps in [eInkColorScheme] filled in.
+ * MMD's theme, with the gaps in [eInkColorScheme] filled in and the type scale
+ * rebuilt - see [appTypography].
  *
  * MMD leaves six surface slots [Color.Unspecified] - `surfaceBright`,
  * `surfaceDim`, `surfaceContainer`, `surfaceContainerHigh`,
@@ -33,10 +38,63 @@ fun AppTheme(content: @Composable () -> Unit) {
             surfaceContainerHighest = white,
             surfaceContainerLowest = white,
         ),
-        typography = eInkTypography,
+        typography = appTypography,
         content = content,
     )
 }
+
+/**
+ * Everything is Bold, and a step or two larger than MMD's own defaults.
+ *
+ * MMD's [eInkTypography] asks for [FontWeight.Medium] in every slot, but the
+ * Lato family it bundles registers no W500 face - only Thin, Light, Regular,
+ * Bold and Black - so Compose's weight matching quietly drops its text to Lato
+ * Regular. On the panel that reads thin and small. Mudita's own MMD apps are
+ * set in Bold throughout, so this asks for W700 explicitly, which is an exact
+ * face match rather than a synthesised weight.
+ *
+ * Sizes are lifted to match: 24sp screen titles, 20sp section headers and
+ * button labels, 18sp body.
+ *
+ * The `display*`, `headlineMedium` and `headlineSmall` slots are set here too.
+ * MMD does not override them, so left alone they fall back to Roboto - nothing
+ * in the app uses them today, but a stray reference would silently change font.
+ */
+private val lato = eInkTypography.headlineLarge.fontFamily
+
+private fun bold(size: TextUnit) = TextStyle(
+    fontFamily = lato,
+    fontWeight = FontWeight.Bold,
+    fontSize = size,
+)
+
+val appTypography = Typography(
+    displayLarge = bold(40.sp),
+    displayMedium = bold(34.sp),
+    displaySmall = bold(30.sp),
+
+    headlineLarge = bold(30.sp),
+    headlineMedium = bold(26.sp),
+    headlineSmall = bold(24.sp),
+
+    // Screen titles.
+    titleLarge = bold(24.sp),
+    // Section headers and primary button labels.
+    titleMedium = bold(20.sp),
+    // Compact controls: the app bar's Clear all, the timer and mistake boxes.
+    titleSmall = bold(16.sp),
+
+    bodyLarge = bold(20.sp),
+    bodyMedium = bold(18.sp),
+    bodySmall = bold(16.sp),
+
+    labelLarge = bold(18.sp),
+    labelMedium = bold(16.sp),
+    labelSmall = bold(14.sp),
+)
+
+/** Full-width primary actions, sized to match Mudita's own MMD apps. */
+val CTA_HEIGHT = 52.dp
 
 /**
  * Fills used for board cells.
@@ -64,19 +122,9 @@ object BoardColors {
 /**
  * Board text styles.
  *
- * MMD asks for [FontWeight.Medium] in every slot, but its Lato family registers
- * no W500 face - only Thin, Light, Regular, Bold and Black (plus italics), so
- * Compose's weight matching lands MMD's body text on Lato Regular. That leaves
- * no room for the given-vs-entered contrast the game depends on, so the board
- * derives its own weights: Black (W900) and Light (W300) both hit real faces
- * exactly, giving a much stronger separation than the Flutter build's w900/w500.
- *
- * Deriving with `copy(fontWeight = ...)` keeps MMD's private Lato family and its
- * 28sp size, so this stays inside the type scale.
- *
- * Only [MaterialTheme.typography] slots MMD actually overrides are used here.
- * `display*`, `headlineMedium` and `headlineSmall` are *not* overridden by MMD
- * and silently fall back to Roboto.
+ * Givens are Black (W900) and entered digits Regular (W400). Both are exact
+ * faces in MMD's Lato family, and the two-step gap keeps the distinction
+ * readable without making the player's own digits look faint.
  */
 @Immutable
 data class BoardTextStyles(
@@ -87,11 +135,12 @@ data class BoardTextStyles(
 
 @Composable
 fun rememberBoardTextStyles(): BoardTextStyles {
-    val headline = MaterialTheme.typography.headlineLarge // Lato 28sp
-    val label = MaterialTheme.typography.labelSmall       // Lato 14sp
+    val headline = MaterialTheme.typography.headlineLarge
+    val label = MaterialTheme.typography.labelSmall
+
     return BoardTextStyles(
         given = headline.copy(fontWeight = FontWeight.Black),
-        entered = headline.copy(fontWeight = FontWeight.Light),
-        note = label,
+        entered = headline.copy(fontWeight = FontWeight.Normal),
+        note = label.copy(fontWeight = FontWeight.Bold),
     )
 }

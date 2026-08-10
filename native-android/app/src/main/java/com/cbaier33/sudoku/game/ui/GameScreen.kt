@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cbaier33.sudoku.R
 import com.cbaier33.sudoku.game.GameViewModel
+import com.cbaier33.sudoku.theme.CTA_HEIGHT
 import com.cbaier33.sudoku.util.formatTime
 import com.mudita.mmd.black
 import com.mudita.mmd.components.bottom_sheet.ModalBottomSheetMMD
@@ -54,7 +56,7 @@ fun GameScreen(
     Scaffold(
         topBar = {
             TopAppBarMMD(
-                title = { TextMMD("Sudoku", style = MaterialTheme.typography.titleMedium) },
+                title = { TextMMD("Sudoku", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -126,7 +128,7 @@ fun GameScreen(
 
                 ButtonMMD(
                     onClick = dismiss,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
                 ) {
                     TextMMD("Continue", style = MaterialTheme.typography.titleMedium)
                 }
@@ -136,7 +138,7 @@ fun GameScreen(
                         viewModel.resetGame()
                         dismiss()
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
                 ) {
                     TextMMD("New Puzzle", style = MaterialTheme.typography.titleMedium)
                 }
@@ -146,7 +148,7 @@ fun GameScreen(
                         menuOpen = false
                         onExit()
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
                 ) {
                     TextMMD("Exit", style = MaterialTheme.typography.titleMedium)
                 }
@@ -162,10 +164,10 @@ private fun Readout(text: String) {
         modifier = Modifier
             .padding(end = 6.dp)
             .border(2.dp, black, RoundedCornerShape(8.dp))
-            .defaultMinSize(minWidth = 52.dp)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
+            .defaultMinSize(minWidth = 56.dp)
+            .padding(horizontal = 6.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
-        TextMMD(text, style = MaterialTheme.typography.labelMedium)
+        TextMMD(text, style = MaterialTheme.typography.titleSmall)
     }
 }

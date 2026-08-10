@@ -57,9 +57,9 @@ fun SudokuBoard(
         // Digits and pencil marks shrink to fit a small cell but never grow past
         // the type scale - the same intent as the Flutter build's
         // FittedBox(fit: BoxFit.scaleDown).
-        val digitSize = with(density) { (cellDp * 0.70f).toSp() }
+        val digitSize = with(density) { (cellDp * 0.78f).toSp() }
             .let { fitted -> if (fitted.value < styles.given.fontSize.value) fitted else styles.given.fontSize }
-        val noteSize = with(density) { (cellDp / BOX * 0.78f).toSp() }
+        val noteSize = with(density) { (cellDp / BOX * 0.92f).toSp() }
             .let { fitted -> if (fitted.value < styles.note.fontSize.value) fitted else styles.note.fontSize }
 
         val measurer = rememberTextMeasurer()
@@ -68,6 +68,8 @@ fun SudokuBoard(
         val givenGlyphs = rememberGlyphs(measurer, styles.given.copy(fontSize = digitSize))
         val enteredGlyphs = rememberGlyphs(measurer, styles.entered.copy(fontSize = digitSize))
         val noteGlyphs = rememberGlyphs(measurer, styles.note.copy(fontSize = noteSize))
+
+        val insetPx = with(density) { 2.dp.toPx() }
 
         val thickPx = with(density) { 3.dp.toPx() }.roundToInt().coerceAtLeast(1)
         val thinPx = with(density) { 1.dp.toPx() }.roundToInt().coerceAtLeast(1)
@@ -93,7 +95,7 @@ fun SudokuBoard(
             drawGridLines(edge, thickPx, thinPx)
 
             if (!state.loading && state.cells.isNotEmpty()) {
-                drawContents(state, edge, givenGlyphs, enteredGlyphs, noteGlyphs)
+                drawContents(state, edge, insetPx, givenGlyphs, enteredGlyphs, noteGlyphs)
             }
         }
     }
@@ -183,6 +185,7 @@ private fun DrawScope.drawGridLines(
 private fun DrawScope.drawContents(
     state: GameUiState,
     edge: IntArray,
+    inset: Float,
     givenGlyphs: List<TextLayoutResult>,
     enteredGlyphs: List<TextLayoutResult>,
     noteGlyphs: List<TextLayoutResult>,
@@ -192,10 +195,11 @@ private fun DrawScope.drawContents(
             val p = CellPoint(x, y)
             val cell = state.cellAt(p)
 
-            val left = edge[y].toFloat()
-            val top = edge[x].toFloat()
-            val width = (edge[y + 1] - edge[y]).toFloat()
-            val height = (edge[x + 1] - edge[x]).toFloat()
+            // Keep glyphs off the grid lines, which are drawn underneath them.
+            val left = edge[y] + inset
+            val top = edge[x] + inset
+            val width = (edge[y + 1] - edge[y]) - inset * 2f
+            val height = (edge[x + 1] - edge[x]) - inset * 2f
 
             if (cell.value == 0) {
                 drawNotes(cell.notes, left, top, width, height, noteGlyphs)

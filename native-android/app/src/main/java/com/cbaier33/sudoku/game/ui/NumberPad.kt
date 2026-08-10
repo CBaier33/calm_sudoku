@@ -22,7 +22,7 @@ import com.mudita.mmd.components.buttons.ButtonMMD
 import com.mudita.mmd.components.buttons.OutlinedButtonMMD
 import com.mudita.mmd.components.text.TextMMD
 
-private val BUTTON_HEIGHT = 48.dp
+private val BUTTON_HEIGHT = 52.dp
 private val GAP = 8.dp
 
 @Composable
@@ -48,7 +48,7 @@ fun NumberPad(
 
                 PadButton(
                     label = digit.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleLarge,
                     filled = false,
                     spent = spent,
                     onClick = { onDigit(digit) },
@@ -63,7 +63,7 @@ fun NumberPad(
         ) {
             PadButton(
                 label = "Notes",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleMedium,
                 filled = state.noteMode,
                 spent = false,
                 onClick = onToggleNotes,
@@ -72,7 +72,7 @@ fun NumberPad(
 
             PadButton(
                 label = "Erase",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleMedium,
                 filled = false,
                 spent = false,
                 onClick = onErase,

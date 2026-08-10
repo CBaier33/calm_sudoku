@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cbaier33.sudoku.game.Difficulty
+import com.cbaier33.sudoku.theme.CTA_HEIGHT
 import com.mudita.mmd.black
 import com.mudita.mmd.components.buttons.ButtonMMD
 import com.mudita.mmd.components.cards.CardMMD
@@ -41,7 +42,7 @@ fun OptionsScreen(
     Scaffold(
         topBar = {
             TopAppBarMMD(
-                title = { TextMMD("Options", style = MaterialTheme.typography.titleMedium) },
+                title = { TextMMD("Options", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -57,7 +58,7 @@ fun OptionsScreen(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            TextMMD("Select Difficulty", style = MaterialTheme.typography.bodyLarge)
+            TextMMD("Select Difficulty", style = MaterialTheme.typography.titleMedium)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -79,7 +80,7 @@ fun OptionsScreen(
             ) {
                 ButtonMMD(
                     onClick = { onPlay(difficulty) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
                 ) {
                     TextMMD("Play", style = MaterialTheme.typography.titleMedium)
                 }
@@ -102,7 +103,7 @@ private fun DifficultyCard(
 ) {
     CardMMD(
         onClick = onClick,
-        modifier = modifier.height(72.dp),
+        modifier = modifier.height(78.dp),
         shape = RoundedCornerShape(8.dp),
         border = BorderStroke(if (selected) 3.dp else 2.dp, black),
     ) {
@@ -111,7 +112,7 @@ private fun DifficultyCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            TextMMD(difficulty.label, style = MaterialTheme.typography.bodyMedium)
+            TextMMD(difficulty.label, style = MaterialTheme.typography.bodyLarge)
             TextMMD("${difficulty.givens} Given", style = MaterialTheme.typography.labelSmall)
         }
     }

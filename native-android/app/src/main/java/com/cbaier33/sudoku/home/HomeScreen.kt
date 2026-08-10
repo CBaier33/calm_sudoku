@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.cbaier33.sudoku.R
+import com.cbaier33.sudoku.theme.CTA_HEIGHT
 import com.mudita.mmd.components.buttons.ButtonMMD
 import com.mudita.mmd.components.buttons.OutlinedButtonMMD
 import com.mudita.mmd.components.text.TextMMD
@@ -47,14 +49,14 @@ fun HomeScreen(
 
             ButtonMMD(
                 onClick = onPlay,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
             ) {
                 TextMMD("Play", style = MaterialTheme.typography.titleMedium)
             }
 
             OutlinedButtonMMD(
                 onClick = onStatistics,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
             ) {
                 TextMMD("Statistics", style = MaterialTheme.typography.titleMedium)
             }
