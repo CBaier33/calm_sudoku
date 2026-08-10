@@ -1,29 +1,16 @@
 #!/bin/sh
+# Build the release APK and install it on the attached device.
+#
+# A debug-signed build cannot upgrade a release-signed one (and the reverse),
+# so if adb rejects the install with INSTALL_FAILED_UPDATE_INCOMPATIBLE, run
+# `adb uninstall com.cbaier33.sudoku` once and try again.
 set -e
 
-echo "Getting packages..."
-flutter pub get
+cd "$(dirname "$0")/.."
 
-echo "Generating launcher icons..."
-dart run flutter_launcher_icons:generate -f pubspec.yaml
+VERSION=$(grep -m1 'versionName' app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
 
-echo "Generating splash screen..."
-dart run flutter_native_splash:create --path=pubspec.yaml
-
-echo "Building release APK..."
-
-VERSION=$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
-
-flutter build apk --release
-
-mv build/app/outputs/flutter-apk/app-release.apk \
-   "build/app/outputs/flutter-apk/sudoku-${VERSION}.apk"
-
-mv build/app/outputs/flutter-apk/app-release.apk.sha1 \
-   "build/app/outputs/flutter-apk/sudoku-${VERSION}.apk.sha1"
-
-echo "Build completed for sudoku-${VERSION}.apk"
+sh scripts/build-release.sh
 
 echo "Installing..."
-
-flutter install --use-application-binary="build/app/outputs/flutter-apk/sudoku-${VERSION}.apk"
+adb install -r "release/sudoku-$VERSION.apk"
