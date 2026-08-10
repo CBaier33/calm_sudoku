@@ -18,15 +18,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbaier33.sudoku.game.Difficulty
+import com.cbaier33.sudoku.game.SavedGameRepository
 import com.cbaier33.sudoku.theme.CTA_HEIGHT
+import com.cbaier33.sudoku.util.formatTime
 import com.mudita.mmd.black
 import com.mudita.mmd.components.buttons.ButtonMMD
+import com.mudita.mmd.components.buttons.OutlinedButtonMMD
 import com.mudita.mmd.components.cards.CardMMD
 import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
@@ -35,9 +41,16 @@ import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 fun OptionsScreen(
     onBack: () -> Unit,
     onPlay: (Difficulty) -> Unit,
+    onResume: (Difficulty) -> Unit,
 ) {
     // Not persisted - the Flutter build built a fresh OptionsViewModel per visit.
     var difficulty by rememberSaveable { mutableStateOf(Difficulty.EASY) }
+
+    val context = LocalContext.current
+    val saves = remember(context) { SavedGameRepository(context.applicationContext) }
+
+    // Re-read on every visit, so a game saved and quit shows up here at once.
+    val saved by saves.summaries.collectAsStateWithLifecycle(initialValue = emptyMap())
 
     Scaffold(
         topBar = {
@@ -68,6 +81,7 @@ fun OptionsScreen(
                     DifficultyCard(
                         difficulty = level,
                         selected = level == difficulty,
+                        saved = level in saved,
                         onClick = { difficulty = level },
                         modifier = Modifier.weight(1f),
                     )
@@ -76,13 +90,36 @@ fun OptionsScreen(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Bottom,
+                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom),
             ) {
-                ButtonMMD(
-                    onClick = { onPlay(difficulty) },
-                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
-                ) {
-                    TextMMD("Play", style = MaterialTheme.typography.titleMedium)
+                val resumable = saved[difficulty]
+
+                if (resumable == null) {
+                    ButtonMMD(
+                        onClick = { onPlay(difficulty) },
+                        modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+                    ) {
+                        TextMMD("Play", style = MaterialTheme.typography.titleMedium)
+                    }
+                } else {
+                    ButtonMMD(
+                        onClick = { onResume(difficulty) },
+                        modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+                    ) {
+                        TextMMD(
+                            "Resume · ${formatTime(resumable.elapsed)}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    // The saved game survives this: only the next Save & Quit at
+                    // this difficulty replaces it.
+                    OutlinedButtonMMD(
+                        onClick = { onPlay(difficulty) },
+                        modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+                    ) {
+                        TextMMD("New Game", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
         }
@@ -98,12 +135,13 @@ fun OptionsScreen(
 private fun DifficultyCard(
     difficulty: Difficulty,
     selected: Boolean,
+    saved: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CardMMD(
         onClick = onClick,
-        modifier = modifier.height(78.dp),
+        modifier = modifier.height(96.dp),
         shape = RoundedCornerShape(8.dp),
         border = BorderStroke(if (selected) 3.dp else 2.dp, black),
     ) {
@@ -114,6 +152,10 @@ private fun DifficultyCard(
         ) {
             TextMMD(difficulty.label, style = MaterialTheme.typography.bodyLarge)
             TextMMD("${difficulty.givens} Given", style = MaterialTheme.typography.labelSmall)
+
+            // Every card is sized for three lines whether or not it has a save,
+            // so marking one never shifts the row.
+            if (saved) TextMMD("Saved", style = MaterialTheme.typography.labelSmall)
         }
     }
 }

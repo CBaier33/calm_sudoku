@@ -3,31 +3,17 @@ package com.cbaier33.sudoku
 import com.cbaier33.sudoku.game.CellPoint
 import com.cbaier33.sudoku.game.Difficulty
 import com.cbaier33.sudoku.game.GameResult
-import com.cbaier33.sudoku.game.GameUiState
-import com.cbaier33.sudoku.game.GameViewModel
-import com.cbaier33.sudoku.game.PuzzleGenerator
 import com.cbaier33.sudoku.game.PuzzleGenerator.Companion.SIZE
 import com.cbaier33.sudoku.game.isPeer
-import com.cbaier33.sudoku.stats.StatsSink
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Covers the rules the Flutter build never had tests for. Boards come from the
@@ -35,87 +21,7 @@ import kotlin.time.Duration.Companion.seconds
  * solution rather than a hard-coded grid.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class GameRulesTest {
-
-    private val dispatcher = StandardTestDispatcher()
-
-    private class RecordedGame(val seconds: Int, val difficulty: Difficulty, val win: Boolean)
-
-    private class FakeStats : StatsSink {
-        val recorded = mutableListOf<RecordedGame>()
-        override suspend fun recordGame(seconds: Int, difficulty: Difficulty, win: Boolean) {
-            recorded += RecordedGame(seconds, difficulty, win)
-        }
-    }
-
-    private lateinit var stats: FakeStats
-    private val built = mutableListOf<GameViewModel>()
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-        stats = FakeStats()
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
-    /**
-     * The tick loop schedules another delay forever, and pauseTimer only gates
-     * the increment, so runTest would never see the scheduler go idle. Every
-     * view model built here gets its timer stopped when the body finishes.
-     */
-    private fun gameTest(body: suspend TestScope.() -> Unit) = runTest(
-        dispatcher,
-        timeout = 30.seconds,
-    ) {
-        built.clear()
-        try {
-            body()
-        } finally {
-            built.forEach { it.stopTimer() }
-        }
-    }
-
-    private fun TestScope.newViewModel(
-        difficulty: Difficulty = Difficulty.EASY,
-        seed: Int = 42,
-    ): GameViewModel {
-        val vm = GameViewModel(
-            difficulty = difficulty,
-            stats = stats,
-            generator = PuzzleGenerator(Random(seed)),
-            externalScope = this,
-            computeDispatcher = dispatcher,
-        )
-        built += vm
-        runCurrent()
-        return vm
-    }
-
-    private fun GameUiState.firstEmpty(): CellPoint {
-        for (x in 0 until SIZE) {
-            for (y in 0 until SIZE) {
-                val p = CellPoint(x, y)
-                if (!cellAt(p).given) return p
-            }
-        }
-        error("puzzle has no empty cell")
-    }
-
-    private fun GameUiState.firstGiven(): CellPoint {
-        for (x in 0 until SIZE) {
-            for (y in 0 until SIZE) {
-                val p = CellPoint(x, y)
-                if (cellAt(p).given) return p
-            }
-        }
-        error("puzzle has no given")
-    }
-
-    private fun wrongDigitFor(solution: Int) = if (solution == 1) 2 else 1
+class GameRulesTest : GameTestSupport() {
 
     @Test
     fun `board loads with the difficulty's mistake budget`() = gameTest {

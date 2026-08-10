@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cbaier33.sudoku.R
+import com.cbaier33.sudoku.game.Difficulty
+import com.cbaier33.sudoku.game.GameResult
 import com.cbaier33.sudoku.game.GameViewModel
 import com.cbaier33.sudoku.theme.CTA_HEIGHT
 import com.cbaier33.sudoku.util.formatTime
@@ -52,6 +54,7 @@ fun GameScreen(
     val elapsed by viewModel.elapsed.collectAsStateWithLifecycle()
 
     var menuOpen by remember { mutableStateOf(false) }
+    var confirmingQuit by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -71,6 +74,7 @@ fun GameScreen(
                         onClick = {
                             viewModel.pauseTimer()
                             menuOpen = true
+                            confirmingQuit = false
                         },
                         modifier = Modifier.padding(end = 4.dp),
                     ) {
@@ -111,48 +115,141 @@ fun GameScreen(
         // Every way out of this sheet resumes the clock, including a scrim tap.
         val dismiss = {
             menuOpen = false
+            confirmingQuit = false
             viewModel.resumeTimer()
         }
+
+        val quit = {
+            viewModel.quitWithoutSaving()
+            menuOpen = false
+            confirmingQuit = false
+            onExit()
+        }
+
+        // A game in play is the only one with anything to lose: a finished board
+        // is spent and has already given up its slot, and one still being dealt
+        // has nothing on it yet.
+        val inPlay = state.result == GameResult.PLAYING && !state.loading
 
         ModalBottomSheetMMD(
             onDismissRequest = dismiss,
             sheetState = sheetState,
             dragHandle = null,
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                TextMMD("Menu", style = MaterialTheme.typography.titleLarge)
-
-                ButtonMMD(
-                    onClick = dismiss,
-                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
-                ) {
-                    TextMMD("Continue", style = MaterialTheme.typography.titleMedium)
-                }
-
-                OutlinedButtonMMD(
-                    onClick = {
+            if (confirmingQuit) {
+                ConfirmQuit(
+                    difficulty = viewModel.difficulty,
+                    losesSave = state.inSaveSlot,
+                    onQuit = quit,
+                    onCancel = { confirmingQuit = false },
+                )
+            } else {
+                PauseMenu(
+                    canSave = inPlay,
+                    onContinue = dismiss,
+                    onNewPuzzle = {
                         viewModel.resetGame()
                         dismiss()
                     },
-                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
-                ) {
-                    TextMMD("New Puzzle", style = MaterialTheme.typography.titleMedium)
-                }
-
-                OutlinedButtonMMD(
-                    onClick = {
+                    onSave = {
+                        viewModel.saveGame()
                         menuOpen = false
                         onExit()
                     },
-                    modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
-                ) {
-                    TextMMD("Exit", style = MaterialTheme.typography.titleMedium)
-                }
+                    onQuit = { if (inPlay) confirmingQuit = true else quit() },
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun PauseMenu(
+    canSave: Boolean,
+    onContinue: () -> Unit,
+    onNewPuzzle: () -> Unit,
+    onSave: () -> Unit,
+    onQuit: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        TextMMD("Menu", style = MaterialTheme.typography.titleLarge)
+
+        ButtonMMD(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+        ) {
+            TextMMD("Continue", style = MaterialTheme.typography.titleMedium)
+        }
+
+        OutlinedButtonMMD(
+            onClick = onNewPuzzle,
+            modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+        ) {
+            TextMMD("New Puzzle", style = MaterialTheme.typography.titleMedium)
+        }
+
+        if (canSave) {
+            OutlinedButtonMMD(
+                onClick = onSave,
+                modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+            ) {
+                TextMMD("Save & Quit", style = MaterialTheme.typography.titleMedium)
+            }
+        }
+
+        OutlinedButtonMMD(
+            onClick = onQuit,
+            modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+        ) {
+            TextMMD("Quit", style = MaterialTheme.typography.titleMedium)
+        }
+    }
+}
+
+/**
+ * Quitting is how a save is thrown away, so it asks first - and says which of
+ * the two things is about to happen, since only a board that came out of the
+ * slot takes the slot with it.
+ */
+@Composable
+private fun ConfirmQuit(
+    difficulty: Difficulty,
+    losesSave: Boolean,
+    onQuit: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        TextMMD("Quit without saving?", style = MaterialTheme.typography.titleLarge)
+
+        TextMMD(
+            text = if (losesSave) {
+                "This board and your saved ${difficulty.label} game are the same " +
+                    "game. Quitting deletes it."
+            } else {
+                "This board will be lost."
+            },
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        ButtonMMD(
+            onClick = onQuit,
+            modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+        ) {
+            TextMMD("Quit", style = MaterialTheme.typography.titleMedium)
+        }
+
+        OutlinedButtonMMD(
+            onClick = onCancel,
+            modifier = Modifier.fillMaxWidth().height(CTA_HEIGHT),
+        ) {
+            TextMMD("Cancel", style = MaterialTheme.typography.titleMedium)
         }
     }
 }

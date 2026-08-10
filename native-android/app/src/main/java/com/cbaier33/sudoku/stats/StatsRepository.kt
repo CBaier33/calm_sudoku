@@ -22,8 +22,9 @@ interface StatsSink {
 }
 
 /**
- * Statistics are the only thing the app persists - never the board, the options
- * or an in-progress game.
+ * Statistics, in their own store. The only other thing the app persists is a
+ * game put down mid-play - see
+ * [com.cbaier33.sudoku.game.SavedGameRepository]. Options are never saved.
  *
  * Key names are carried over verbatim from the Flutter build's
  * `lib/services/stats_service.dart`, which used shared_preferences. Nothing

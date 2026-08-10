@@ -37,11 +37,15 @@ import kotlinx.coroutines.withContext
 class GameViewModel(
     val difficulty: Difficulty,
     private val stats: StatsSink,
+    private val saves: SavedGameStore,
+    /** Start from this difficulty's save slot rather than dealing a new puzzle. */
+    resume: Boolean = false,
     private val generator: PuzzleGenerator = PuzzleGenerator(),
     /**
-     * Statistics are written here rather than in [viewModelScope] so popping the
-     * game screen the instant a game ends cannot cancel the write. The Flutter
-     * build fired `recordGame` without awaiting it and had exactly that race.
+     * Statistics and saves are written here rather than in [viewModelScope] so
+     * popping the game screen the instant a game ends - or the instant it is
+     * saved - cannot cancel the write. The Flutter build fired `recordGame`
+     * without awaiting it and had exactly that race.
      */
     private val externalScope: CoroutineScope = AppScope,
     /** Overridden in tests so generation is deterministic and instant. */
@@ -58,7 +62,7 @@ class GameViewModel(
     private var paused = false
 
     init {
-        newGame()
+        if (resume) resumeSavedGame() else newGame()
     }
 
     // ---------------------------------------------------------------- board
@@ -69,7 +73,8 @@ class GameViewModel(
      * with a uniqueness solve each is an ANR risk on a hard puzzle.
      */
     private fun newGame() {
-        _state.update { it.copy(loading = true) }
+        // A puzzle being dealt is nobody's saved game, from this moment on.
+        _state.update { it.copy(loading = true, inSaveSlot = false) }
 
         viewModelScope.launch {
             val generated = withContext(computeDispatcher) {
@@ -92,10 +97,95 @@ class GameViewModel(
         }
     }
 
-    /** Deals a new puzzle without changing the difficulty. */
+    /**
+     * Deals a new puzzle without changing the difficulty. The save slot is left
+     * as it was - "New Puzzle" is not a way to throw a save away.
+     */
     fun resetGame() {
         resetTimer()
         newGame()
+    }
+
+    // ------------------------------------------------------------------ saves
+
+    /**
+     * Restores this difficulty's slot, clock and all.
+     *
+     * A slot that has gone missing - cleared by a game finished elsewhere, or
+     * written by an older build - deals a fresh puzzle instead. The options
+     * screen only offers Resume when a save exists, but the navigation argument
+     * outlives process death, so this cannot be an error path.
+     */
+    private fun resumeSavedGame() {
+        _state.update { it.copy(loading = true) }
+
+        viewModelScope.launch {
+            val saved = saves.load(difficulty)
+
+            if (saved == null) {
+                newGame()
+                return@launch
+            }
+
+            _elapsed.value = saved.elapsed
+
+            _state.value = GameUiState(
+                cells = saved.cells,
+                mistakes = saved.mistakes,
+                mistakesAllowed = difficulty.mistakes,
+                loading = false,
+                inSaveSlot = true,
+            ).recount()
+        }
+    }
+
+    /**
+     * Writes the board into this difficulty's slot, replacing whatever was
+     * there. Backs the pause menu's Save & Quit, which pops the screen as soon
+     * as this returns - hence [externalScope].
+     *
+     * A finished game has nothing worth resuming, so it is not saved.
+     */
+    fun saveGame() {
+        val current = _state.value
+        if (current.loading || current.result != GameResult.PLAYING) return
+
+        stopTimer()
+
+        val snapshot = SavedGame(
+            elapsed = _elapsed.value,
+            mistakes = current.mistakes,
+            cells = current.cells,
+        )
+
+        _state.update { it.copy(inSaveSlot = true) }
+
+        externalScope.launch { saves.save(difficulty, snapshot) }
+    }
+
+    /**
+     * Leaving without saving. The board is thrown away either way; if it is the
+     * one in this difficulty's slot, the slot goes with it.
+     *
+     * That is the only way to be rid of a save short of finishing the game -
+     * resuming a puzzle you no longer want should not oblige you to solve it.
+     */
+    fun quitWithoutSaving() {
+        stopTimer()
+        releaseSaveSlot()
+    }
+
+    /**
+     * Empties this difficulty's slot, but only if the board on screen is what
+     * is in it. Quitting or finishing an unrelated puzzle must not throw away a
+     * save the player never picked up.
+     */
+    private fun releaseSaveSlot() {
+        if (!_state.value.inSaveSlot) return
+
+        _state.update { it.copy(inSaveSlot = false) }
+
+        externalScope.launch { saves.clear(difficulty) }
     }
 
     // ---------------------------------------------------------- cell actions
@@ -190,6 +280,9 @@ class GameViewModel(
 
         externalScope.launch { stats.recordGame(seconds, difficulty, won) }
 
+        // A game that is over must not be resumable.
+        releaseSaveSlot()
+
         _state.update { current ->
             val cells = if (won) current.cells else current.cells.map { cell ->
                 cell.copy(value = cell.solution, notes = emptySet())
@@ -252,7 +345,7 @@ class GameViewModel(
         const val HIGHLIGHT_PEERS = true
         const val AUTO_CLEAR_NOTES = true
 
-        /** Reads the difficulty straight off the navigation argument. */
+        /** Reads the difficulty and the resume flag off the navigation route. */
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
@@ -261,6 +354,8 @@ class GameViewModel(
                 GameViewModel(
                     difficulty = Difficulty.fromName(handle["difficulty"]),
                     stats = StatsRepository(application),
+                    saves = SavedGameRepository(application),
+                    resume = handle["resume"] ?: false,
                 )
             }
         }

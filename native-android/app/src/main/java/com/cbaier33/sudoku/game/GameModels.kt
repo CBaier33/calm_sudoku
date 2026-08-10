@@ -44,6 +44,12 @@ data class GameUiState(
     /** `digitsRemaining[d]` is how many of digit `d` are still missing. */
     val digitsRemaining: List<Int> = List(SIZE + 1) { SIZE },
     val loading: Boolean = true,
+    /**
+     * Whether this board is the one sitting in its difficulty's save slot -
+     * either resumed from it or written to it. Quitting or finishing such a
+     * board empties the slot; any other board leaves it alone.
+     */
+    val inSaveSlot: Boolean = false,
 ) {
     fun cellAt(p: CellPoint): CellItem = cells[p.index]
 

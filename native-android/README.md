@@ -7,6 +7,28 @@ Mudita's Apache-2.0 Compose component library for E Ink displays.
 Behaviour is a strict port of the Flutter build: the same puzzle generator,
 the same rules, the same four screens. The visual language is MMD's.
 
+## Saved games
+
+The one deliberate divergence from the Flutter build, which persisted nothing
+but statistics. **Save & Quit** in the pause menu puts the board down mid-play;
+**Resume** on the options screen picks it back up.
+
+There is one slot per difficulty, keyed `game_easy` / `game_medium` /
+`game_hard` in a `saved_games` DataStore of its own, so a board can never take
+the statistics with it. A slot holds the grid, the pencil marks, the mistakes
+and the clock - see `game/SavedGame.kt` for the encoding.
+
+A slot is written only by an explicit Save & Quit. It is emptied by an
+overwrite, or when the game that occupies it ends - by being finished, or by
+**Quit**, which is the way to throw a save away without having to solve it.
+Quitting a game in play asks first, and says which of the two is about to
+happen.
+
+Everything turns on whether the board on screen *is* the one in the slot, which
+`GameUiState.inSaveSlot` tracks: set by resuming or saving, given up by dealing
+a new puzzle. Quitting or finishing any other board - a fresh puzzle started at
+a difficulty that already has a save - leaves that save exactly where it was.
+
 ## Build
 
 ```bash

@@ -18,10 +18,13 @@ object Routes {
     const val HOME = "home"
     const val OPTIONS = "options"
     const val STATS = "stats"
-    const val GAME = "game/{difficulty}"
+    const val GAME = "game/{difficulty}?resume={resume}"
 
-    fun game(difficulty: Difficulty) = "game/${difficulty.name}"
+    fun game(difficulty: Difficulty, resume: Boolean = false) =
+        "game/${difficulty.name}?resume=$resume"
+
     const val ARG_DIFFICULTY = "difficulty"
+    const val ARG_RESUME = "resume"
 }
 
 /**
@@ -51,16 +54,25 @@ fun SudokuApp() {
             OptionsScreen(
                 onBack = { navController.popBackStack() },
                 onPlay = { difficulty -> navController.navigate(Routes.game(difficulty)) },
+                onResume = { difficulty ->
+                    navController.navigate(Routes.game(difficulty, resume = true))
+                },
             )
         }
 
         composable(
             route = Routes.GAME,
-            arguments = listOf(navArgument(Routes.ARG_DIFFICULTY) { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument(Routes.ARG_DIFFICULTY) { type = NavType.StringType },
+                navArgument(Routes.ARG_RESUME) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+            ),
         ) {
             GameScreen(
                 onBack = { navController.popBackStack() },
-                // "Exit" in the pause menu drops straight back to the title,
+                // Quit and Save & Quit both drop straight back to the title,
                 // matching Navigator.popUntil((route) => route.isFirst).
                 onExit = { navController.popBackStack(Routes.HOME, inclusive = false) },
             )
