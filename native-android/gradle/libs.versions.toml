@@ -1,0 +1,43 @@
+[versions]
+agp = "8.7.3"
+kotlin = "2.0.21"
+
+# MMD 1.0.2 is compiled against material3 1.3.1 / compose-ui 1.7.x and uses
+# LocalRippleConfiguration, which was experimental in the 1.3.x line. Pin these
+# rather than floating on a BOM, or MMD can fail at runtime.
+composeUi = "1.7.5"
+material3 = "1.3.1"
+mmd = "1.0.2"
+
+activityCompose = "1.9.3"
+lifecycle = "2.8.7"
+navigation = "2.8.4"
+datastore = "1.1.1"
+splashscreen = "1.0.1"
+
+junit = "4.13.2"
+coroutines = "1.8.1"
+
+[libraries]
+mmd = { module = "com.mudita:MMD", version.ref = "mmd" }
+
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "composeUi" }
+compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "composeUi" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "composeUi" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "composeUi" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

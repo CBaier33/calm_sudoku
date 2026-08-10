@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vector replacement for the Flutter build's assets/pause.png (216x294 raster).
+     Bar geometry taken from that file: two 66px bars, 48px apart, 270px tall. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M7.3,2 h1.4 a1.8,1.8 0 0 1 1.8,1.8 v16.4 a1.8,1.8 0 0 1 -1.8,1.8 h-1.4 a1.8,1.8 0 0 1 -1.8,-1.8 v-16.4 a1.8,1.8 0 0 1 1.8,-1.8 z" />
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M15.3,2 h1.4 a1.8,1.8 0 0 1 1.8,1.8 v16.4 a1.8,1.8 0 0 1 -1.8,1.8 h-1.4 a1.8,1.8 0 0 1 -1.8,-1.8 v-16.4 a1.8,1.8 0 0 1 1.8,-1.8 z" />
+</vector>
