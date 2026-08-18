@@ -3,7 +3,7 @@
 Last Updated: 08-09-2026
 
 ## 1. Introduction
-Sudoku (the "App"), developed by Christopher Baier ("I," "me," or "my"), is committed to protecting your privacy. This Privacy Policy explains how I handle your information when you use this mobile application on Android via Google Play.
+Calm Sudoku (the "App"), developed by Christopher Baier ("I," "me," or "my"), is committed to protecting your privacy. This Privacy Policy explains how I handle your information when you use this mobile application on Android via Google Play.
 
 ## 2. Information We Collect
 I do not collect, store, or share any personal information from you. The App is designed to function entirely without requiring access to your device's data or personal identifiers.

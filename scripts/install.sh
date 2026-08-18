@@ -13,4 +13,4 @@ VERSION=$(grep -m1 'versionName' app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/'
 sh scripts/build-release.sh
 
 echo "Installing..."
-adb install -r "release/sudoku-$VERSION.apk"
+adb install -r "release/calm-sudoku-$VERSION.apk"

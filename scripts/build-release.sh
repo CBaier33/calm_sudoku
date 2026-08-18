@@ -1,5 +1,5 @@
 #!/bin/sh
-# Build a signed release APK and collect it in release/ as sudoku-<version>.apk,
+# Build a signed release APK and collect it in release/ as calm-sudoku-<version>.apk,
 # alongside a .sha1 of the same name. Signing keys come from key.properties in
 # the repository root; without it Gradle falls back to the debug keystore and
 # this script says so rather than shipping a debug-signed APK by surprise.
@@ -29,8 +29,8 @@ OUT="release"
 APK="app/build/outputs/apk/release/app-release.apk"
 
 mkdir -p "$OUT"
-cp "$APK" "$OUT/sudoku-$VERSION.apk"
-sha1sum "$OUT/sudoku-$VERSION.apk" | awk '{print $1}' > "$OUT/sudoku-$VERSION.apk.sha1"
+cp "$APK" "$OUT/calm-sudoku-$VERSION.apk"
+sha1sum "$OUT/calm-sudoku-$VERSION.apk" | awk '{print $1}' > "$OUT/calm-sudoku-$VERSION.apk.sha1"
 
 # apksigner ships in the SDK build-tools and is rarely on PATH, so fall back to
 # the newest copy under sdk.dir. The check is a courtesy, not a gate.
@@ -40,8 +40,8 @@ if [ -z "$APKSIGNER" ] && [ -f local.properties ]; then
     APKSIGNER=$(ls -d "$SDK_DIR"/build-tools/*/apksigner 2>/dev/null | tail -1)
 fi
 if [ -n "$APKSIGNER" ]; then
-    "$APKSIGNER" verify --print-certs "$OUT/sudoku-$VERSION.apk" \
+    "$APKSIGNER" verify --print-certs "$OUT/calm-sudoku-$VERSION.apk" \
         | grep -i 'certificate DN' || true
 fi
 
-echo "Build completed for $OUT/sudoku-$VERSION.apk"
+echo "Build completed for $OUT/calm-sudoku-$VERSION.apk"

@@ -1,4 +1,4 @@
-# Sudoku
+# Calm Sudoku
 
 ## Background
 
@@ -6,7 +6,7 @@ A companion to my [minesweeper](https://github.com/CBaier33/minesweeper) app, bu
 
 Every board is generated on the device. A solved grid is built first, then cells are removed one at a time and each removal is kept only if the puzzle still has exactly one solution, so there is always a way to reason your way to the answer without guessing.
 
-The app is native Kotlin/Jetpack Compose, built on [Mudita Mindful Design (MMD)](https://github.com/mudita/MMD) — Mudita's Apache-2.0 Compose component library for E Ink displays. It replaces an earlier Flutter build; the rules, the generator and the four screens carried over unchanged, and the visual language is now MMD's.
+The app is native Kotlin/Jetpack Compose, built on [Mudita Mindful Design (MMD)](https://github.com/mudita/MMD) — Mudita's Apache-2.0 Compose component library for E Ink displays. 
 
 ## Installation
 
@@ -80,10 +80,6 @@ Everything turns on whether the board on screen *is* the one in the slot, which
 a new puzzle. Quitting or finishing any other board — a fresh puzzle started at
 a difficulty that already has a save — leaves that save exactly where it was.
 
-## Design
-
-Mudita Kompakt users should find the UI familiar. Everything is pure black on white with hard borders and no motion, which is what an e-ink panel is good at: page transitions are stripped, the option toggles do not animate, and the only greys in the app are the ones that mark the selected cell and its peers.
-
 ## Build
 
 ```bash
@@ -99,31 +95,6 @@ Android Studio).
 A debug build cannot upgrade a release-signed install of the same
 `applicationId`. If `adb` refuses with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`,
 run `adb uninstall com.cbaier33.sudoku` once first.
-
-### Release builds
-
-`scripts/build-release.sh` runs the unit tests, assembles a release APK and
-collects it in `release/` as `sudoku-<versionName>.apk` with a matching
-`.sha1`. `scripts/install.sh` does the same and then `adb install -r`s it.
-
-Signing keys come from a `key.properties` in the repository root. It is
-gitignored, and holds:
-
-```properties
-storeFile=/absolute/path/to/upload-keystore.jks
-storePassword=…
-keyAlias=…
-keyPassword=…
-```
-
-Without that file Gradle falls back to the debug keystore so `assembleRelease`
-still works; the script warns when that happens rather than letting a
-debug-signed APK pass for a release.
-
-The version comes from `versionName` in `app/build.gradle.kts` — bump
-`versionCode` alongside it, or the new APK will not install over the old one.
-
-## Dependency pinning
 
 MMD 1.0.2 is compiled against **material3 1.3.1** and uses
 `LocalRippleConfiguration`, which was experimental in that line. `material3` and
